@@ -1,0 +1,7 @@
+$ terraform -chdir=infra fmt -check -recursive && terraform -chdir=infra validate && terraform -chdir=infra/bootstrap validate
+Success! The configuration is valid.
+
+Success! The configuration is valid.
+
+
+[exit code 0]

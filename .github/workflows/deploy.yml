@@ -1,0 +1,120 @@
+name: ci-cd
+
+# Pull requests: test + terraform plan (read-only role).
+# Push to main: test + terraform apply (deploy role) + CloudFront invalidation + smoke test.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # GitHub OIDC -> AWS, no long-lived keys
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-south-1
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+  TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Backend unit tests
+        run: python -m unittest discover -s app/backend/tests -v
+      - name: Backend compile check
+        run: python -m compileall -q app/backend/src
+      - name: Frontend syntax check
+        run: node --check app/frontend/app.js
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive infra
+
+  plan:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build Lambda layer
+        working-directory: .
+        run: ./scripts/build.sh
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+      - name: Init
+        run: terraform init -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=examhub/prod.tfstate" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="use_lockfile=true"
+      - name: Validate
+        run: terraform validate
+      - name: Plan
+        run: terraform plan -lock=false -no-color
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build Lambda layer
+        working-directory: .
+        run: ./scripts/build.sh
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+          terraform_wrapper: false
+      - name: Init
+        run: terraform init -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=examhub/prod.tfstate" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="use_lockfile=true"
+      - name: Apply
+        run: terraform apply -auto-approve -no-color
+      - name: Invalidate CloudFront cache
+        run: |
+          DIST_ID=$(terraform output -raw cloudfront_distribution_id)
+          aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*" --query 'Invalidation.Id' --output text
+      - name: Smoke test
+        run: |
+          URL=$(terraform output -raw api_health_url)
+          for i in $(seq 1 20); do
+            if curl -fsS "$URL?deep=1"; then echo; echo "healthy"; exit 0; fi
+            echo "waiting for API ($i)"; sleep 15
+          done
+          echo "API did not become healthy"; exit 1
+      - name: Summary
+        run: |
+          echo "### Deployed :rocket:" >> "$GITHUB_STEP_SUMMARY"
+          echo "Site: $(terraform output -raw site_url)" >> "$GITHUB_STEP_SUMMARY"

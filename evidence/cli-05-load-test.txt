@@ -1,0 +1,6 @@
+$ python3 scripts/load_test.py --url https://d3dyid6yjzypgx.cloudfront.net --workers 8 --requests 50
+requests: 400 in 8.8s  (45.4 req/s)
+status codes: {200: 400}
+latency ms: p50=162  p95=211  max=291
+
+[exit code 0]

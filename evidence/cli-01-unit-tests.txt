@@ -1,0 +1,27 @@
+$ python3 -m unittest discover -s app/backend/tests -v
+test_datetime_is_returned_as_utc_iso (test_db.CellConversion.test_datetime_is_returned_as_utc_iso) ... ok
+test_decimal_becomes_float (test_db.CellConversion.test_decimal_becomes_float) ... ok
+test_jsonb_round_trip (test_db.CellConversion.test_jsonb_round_trip) ... ok
+test_plain_values_unchanged (test_db.CellConversion.test_plain_values_unchanged) ... ok
+test_uuid_becomes_string (test_db.CellConversion.test_uuid_becomes_string) ... ok
+test_dicts_and_lists_are_sent_as_json (test_db.ParamConversion.test_dicts_and_lists_are_sent_as_json) ... ok
+test_scalars_unchanged (test_db.ParamConversion.test_scalars_unchanged) ... ok
+test_invalid (test_logic.ExamValidationTest.test_invalid) ... ok
+test_valid (test_logic.ExamValidationTest.test_valid) ... ok
+test_parse_groups (test_logic.RolesTest.test_parse_groups) ... ok
+test_primary_role_precedence (test_logic.RolesTest.test_primary_role_precedence) ... ok
+test_match (test_logic.RoutingTest.test_match) ... ok
+test_all_correct (test_logic.ScoreMcqTest.test_all_correct) ... ok
+test_mcq_only_exam (test_logic.ScoreMcqTest.test_mcq_only_exam) ... ok
+test_wrong_blank_and_garbage (test_logic.ScoreMcqTest.test_wrong_blank_and_garbage) ... ok
+test_accepts_pdf_and_zip (test_logic.UploadValidationTest.test_accepts_pdf_and_zip) ... ok
+test_magic_bytes (test_logic.UploadValidationTest.test_magic_bytes) ... ok
+test_rejects_large_and_wrong_type (test_logic.UploadValidationTest.test_rejects_large_and_wrong_type) ... ok
+test_safe_filename (test_logic.UploadValidationTest.test_safe_filename) ... ok
+
+----------------------------------------------------------------------
+Ran 19 tests in 0.001s
+
+OK
+
+[exit code 0]

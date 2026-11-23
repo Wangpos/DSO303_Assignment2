@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars (git-ignored) for local deploys.
+# In CI these values come from GitHub secrets/variables as TF_VAR_* env vars.
+
+notification_email = "you@example.com"   # SES sender + demo user mailbox (must click the SES verification email)
+# alarm_email      = "ops@example.com"
+
+# Lab defaults (cheap). For an exam week in production use:
+# high_availability_nat       = true
+# db_instance_class           = "db.r7g.large"
+# db_backup_retention_days    = 35
+# api_provisioned_concurrency = 50
+# deletion_protection         = true
+# campus_cidrs                = ["203.0.113.0/24"]
+# domain_name                 = "exams.example.edu"
+# hosted_zone_id              = "Z0123456789ABC"

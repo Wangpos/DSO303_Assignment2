@@ -1,0 +1,872 @@
+$ NOTIFICATION_EMAIL=<your-email> ./scripts/deploy.sh -auto-approve
+==> Bootstrap (state bucket + GitHub OIDC roles) for Wangpos/DSO303_Assignment2
+data.aws_caller_identity.current: Reading...
+data.aws_iam_openid_connect_provider.github[0]: Reading...
+data.aws_caller_identity.current: Read complete after 0s [id=363242104805]
+aws_s3_bucket.state: Refreshing state... [id=examhub-tfstate-363242104805]
+aws_s3_bucket_public_access_block.state: Refreshing state... [id=examhub-tfstate-363242104805]
+aws_s3_bucket_versioning.state: Refreshing state... [id=examhub-tfstate-363242104805]
+aws_s3_bucket_server_side_encryption_configuration.state: Refreshing state... [id=examhub-tfstate-363242104805]
+aws_s3_bucket_policy.state: Refreshing state... [id=examhub-tfstate-363242104805]
+data.aws_iam_openid_connect_provider.github[0]: Read complete after 4s [id=arn:aws:iam::363242104805:oidc-provider/token.actions.githubusercontent.com]
+aws_iam_role.deploy: Refreshing state... [id=examhub-github-deploy]
+aws_iam_role.plan: Refreshing state... [id=examhub-github-plan]
+aws_iam_role_policy_attachment.deploy_admin: Refreshing state... [id=examhub-github-deploy-20261119091041590500000002]
+aws_iam_role_policy_attachment.plan_readonly: Refreshing state... [id=examhub-github-plan-20261119091039794900000001]
+aws_iam_role_policy.plan_extra: Refreshing state... [id=examhub-github-plan:state-and-secrets]
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+deploy_role_arn = "arn:aws:iam::363242104805:role/examhub-github-deploy"
+plan_role_arn = "arn:aws:iam::363242104805:role/examhub-github-plan"
+state_bucket = "examhub-tfstate-363242104805"
+==> Build Lambda layer (pg8000 + RDS CA bundle)
+Lambda layer ready: 4.0M in infra/build/layer
+==> Main stack
+Initializing the backend...
+
+Successfully configured the backend "s3"! Terraform will automatically
+use this backend unless the backend configuration changes.
+Initializing provider plugins...
+- Reusing previous version of hashicorp/archive from the dependency lock file
+- Reusing previous version of hashicorp/aws from the dependency lock file
+- Reusing previous version of hashicorp/random from the dependency lock file
+- Using previously-installed hashicorp/archive v2.8.1
+- Using previously-installed hashicorp/aws v5.100.0
+- Using previously-installed hashicorp/random v3.9.1
+
+Terraform has been successfully initialized!
+
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
+
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
+data.archive_file.layer: Reading...
+data.archive_file.backend: Reading...
+random_password.db: Refreshing state... [id=none]
+random_password.demo["student1"]: Refreshing state... [id=none]
+random_password.origin_verify: Refreshing state... [id=none]
+random_password.demo["tutor1"]: Refreshing state... [id=none]
+random_password.demo["admin1"]: Refreshing state... [id=none]
+random_string.cognito_domain: Refreshing state... [id=w2seqt]
+data.archive_file.backend: Read complete after 0s [id=719946498a01e09fc6c9da2d0eeb37fdf3242328]
+data.archive_file.layer: Read complete after 0s [id=41dbf004875af89f9ef1c996399d9c5d8baab443]
+aws_cloudwatch_log_group.fn["notifier"]: Refreshing state... [id=/aws/lambda/examhub-prod-notifier]
+aws_kms_key.main: Refreshing state... [id=88fa31fe-8af9-476e-abc9-2acad6e3649b]
+aws_lambda_layer_version.deps: Refreshing state... [id=arn:aws:lambda:ap-south-1:363242104805:layer:examhub-prod-deps:1]
+aws_cloudwatch_log_group.fn["api"]: Refreshing state... [id=/aws/lambda/examhub-prod-api]
+aws_sqs_queue.notify_dlq: Refreshing state... [id=https://sqs.ap-south-1.amazonaws.com/363242104805/examhub-prod-notify-dlq]
+aws_cloudwatch_log_group.fn["migrate"]: Refreshing state... [id=/aws/lambda/examhub-prod-migrate]
+aws_iam_role.backup: Refreshing state... [id=examhub-prod-backup]
+aws_cloudwatch_log_group.fn["marker"]: Refreshing state... [id=/aws/lambda/examhub-prod-marker]
+aws_iam_role.flow_logs: Refreshing state... [id=examhub-prod-vpc-flow-logs]
+aws_cloudwatch_log_group.api_access: Refreshing state... [id=/aws/apigateway/examhub-prod-api]
+aws_sns_topic.alarms: Refreshing state... [id=arn:aws:sns:ap-south-1:363242104805:examhub-prod-alarms]
+aws_db_parameter_group.main: Refreshing state... [id=examhub-prod-pg17]
+aws_cloudfront_origin_access_control.frontend: Refreshing state... [id=E3CDIMZI3S2A11]
+data.aws_cloudfront_response_headers_policy.security: Reading...
+data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Reading...
+aws_apigatewayv2_api.http: Refreshing state... [id=j70dpamywe]
+aws_cloudfront_cache_policy.api: Refreshing state... [id=bbbdf430-2d0b-4126-8d35-cd6322b0262b]
+data.aws_availability_zones.available: Reading...
+data.aws_iam_policy_document.lambda_assume: Reading...
+data.aws_iam_policy_document.lambda_assume: Read complete after 0s [id=2690255455]
+data.aws_caller_identity.current: Reading...
+aws_cloudwatch_log_group.flow_logs: Refreshing state... [id=/vpc/examhub-prod/flow-logs]
+data.aws_caller_identity.current: Read complete after 0s [id=363242104805]
+aws_sesv2_email_identity.sender: Refreshing state... [id=<your-email>]
+data.aws_availability_zones.available: Read complete after 0s [id=ap-south-1]
+data.aws_region.current: Reading...
+data.aws_region.current: Read complete after 0s [id=ap-south-1]
+aws_vpc.main: Refreshing state... [id=vpc-0f2a868b6cea0c712]
+data.aws_cloudfront_cache_policy.optimized: Reading...
+aws_sqs_queue.marking_dlq: Refreshing state... [id=https://sqs.ap-south-1.amazonaws.com/363242104805/examhub-prod-marking-dlq]
+aws_eip.nat[0]: Refreshing state... [id=eipalloc-0f6dc5cec3f752272]
+aws_kms_alias.main: Refreshing state... [id=alias/examhub-prod]
+aws_secretsmanager_secret.origin_verify: Refreshing state... [id=arn:aws:secretsmanager:ap-south-1:363242104805:secret:examhub-prod/origin-verify-20261119091114292800000013-m8KYny]
+aws_secretsmanager_secret.db: Refreshing state... [id=arn:aws:secretsmanager:ap-south-1:363242104805:secret:examhub-prod/db-master-20261123121328530200000001-aNobMj]
+data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Read complete after 2s [id=b689b0a8-53d0-40ab-baf2-68738e2966ac]
+aws_backup_vault.main: Refreshing state... [id=examhub-prod-vault]
+aws_sns_topic_subscription.alarm_email: Refreshing state... [id=arn:aws:sns:ap-south-1:363242104805:examhub-prod-alarms:767a11d0-cee0-4d6f-b5db-4234730cd070]
+aws_sqs_queue.notify: Refreshing state... [id=https://sqs.ap-south-1.amazonaws.com/363242104805/examhub-prod-notify]
+aws_apigatewayv2_stage.default: Refreshing state... [id=$default]
+aws_iam_role.fn["marker"]: Refreshing state... [id=examhub-prod-marker]
+aws_iam_role.fn["notifier"]: Refreshing state... [id=examhub-prod-notifier]
+aws_iam_role.fn["api"]: Refreshing state... [id=examhub-prod-api]
+data.aws_cloudfront_cache_policy.optimized: Read complete after 2s [id=658327ea-f89d-4fab-a63d-7e88639e58f6]
+aws_iam_role.fn["migrate"]: Refreshing state... [id=examhub-prod-migrate]
+aws_wafv2_ip_set.campus: Refreshing state... [id=802f41fd-d222-49ef-97cb-16ba39458406]
+data.aws_cloudfront_response_headers_policy.security: Read complete after 2s [id=67f7725c-6f97-4210-82d7-5512b31e9d03]
+aws_sqs_queue.marking: Refreshing state... [id=https://sqs.ap-south-1.amazonaws.com/363242104805/examhub-prod-marking]
+aws_cloudwatch_metric_alarm.api_latency: Refreshing state... [id=examhub-prod-api-latency-p95]
+aws_cloudwatch_metric_alarm.api_5xx: Refreshing state... [id=examhub-prod-api-5xx]
+aws_cloudwatch_metric_alarm.dlq["marking"]: Refreshing state... [id=examhub-prod-marking-dlq-not-empty]
+aws_cloudwatch_metric_alarm.dlq["notify"]: Refreshing state... [id=examhub-prod-notify-dlq-not-empty]
+aws_secretsmanager_secret_version.origin_verify: Refreshing state... [id=arn:aws:secretsmanager:ap-south-1:363242104805:secret:examhub-prod/origin-verify-20261119091114292800000013-m8KYny|terraform-20261119091117020600000018]
+aws_route_table.data: Refreshing state... [id=rtb-0d2191e1114fc4e5c]
+aws_internet_gateway.main: Refreshing state... [id=igw-017842a1cc64a9193]
+aws_route_table.public: Refreshing state... [id=rtb-02d91874f2538385b]
+aws_security_group.db: Refreshing state... [id=sg-0f5f5b42293568bfe]
+aws_security_group.lambda: Refreshing state... [id=sg-03c3e6aaec1019a3a]
+data.aws_iam_policy_document.db_access: Reading...
+data.aws_iam_policy_document.db_access: Read complete after 0s [id=519928709]
+aws_s3_bucket.frontend: Refreshing state... [id=examhub-prod-frontend-363242104805]
+aws_s3_bucket.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_subnet.data[0]: Refreshing state... [id=subnet-09de4af58c043319a]
+aws_subnet.data[1]: Refreshing state... [id=subnet-0b4452cb8f2ffd3b5]
+aws_route_table.app[1]: Refreshing state... [id=rtb-044e08b631ed927ab]
+aws_route_table.app[0]: Refreshing state... [id=rtb-07fb6134d85bca6e4]
+aws_subnet.app[0]: Refreshing state... [id=subnet-00b06dec8b5cf8302]
+aws_subnet.app[1]: Refreshing state... [id=subnet-0c5b86104c0d7e718]
+aws_subnet.public[1]: Refreshing state... [id=subnet-0723a880d5d07fe11]
+aws_subnet.public[0]: Refreshing state... [id=subnet-0cd6cfc2c2a4ff9e0]
+aws_backup_plan.main: Refreshing state... [id=c9eca627-8d4e-43fd-9959-77b324034a8b]
+data.aws_iam_policy_document.marker: Reading...
+data.aws_iam_policy_document.marker: Read complete after 0s [id=184272316]
+aws_cloudwatch_metric_alarm.marking_backlog: Refreshing state... [id=examhub-prod-marking-backlog-age]
+aws_iam_role_policy_attachment.backup["arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores"]: Refreshing state... [id=examhub-prod-backup-20261119091109291900000009]
+aws_iam_role_policy_attachment.backup["arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"]: Refreshing state... [id=examhub-prod-backup-2026111909110929900000000a]
+aws_route.public_internet: Refreshing state... [id=r-rtb-02d91874f2538385b1080289494]
+aws_vpc_security_group_egress_rule.lambda_https: Refreshing state... [id=sgr-04b08e4f35f05a078]
+aws_vpc_security_group_egress_rule.lambda_db: Refreshing state... [id=sgr-08fe577951fd87151]
+aws_db_subnet_group.main: Refreshing state... [id=examhub-prod-db]
+aws_route_table_association.data[0]: Refreshing state... [id=rtbassoc-0e163a53fcd31b981]
+aws_route_table_association.data[1]: Refreshing state... [id=rtbassoc-0874b564b1779665f]
+aws_vpc_endpoint.s3: Refreshing state... [id=vpce-07e16f31c6e1a1e93]
+aws_flow_log.vpc: Refreshing state... [id=fl-002d5b40d8a133976]
+aws_wafv2_web_acl.main: Refreshing state... [id=1d623c03-44f6-4e1d-a57e-27519da2cc6e]
+aws_iam_role_policy.flow_logs: Refreshing state... [id=examhub-prod-vpc-flow-logs:terraform-20261119091105656100000001]
+aws_route_table_association.app[0]: Refreshing state... [id=rtbassoc-008176047727d6df0]
+aws_route_table_association.app[1]: Refreshing state... [id=rtbassoc-0443b898097874124]
+aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-04484e093d8b09357]
+aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-0c22d0d59411d5818]
+aws_nat_gateway.main[0]: Refreshing state... [id=nat-05ecee0c9e4aa3efd]
+aws_route.app_nat[1]: Refreshing state... [id=r-rtb-044e08b631ed927ab1080289494]
+aws_route.app_nat[0]: Refreshing state... [id=r-rtb-07fb6134d85bca6e41080289494]
+aws_s3_bucket_public_access_block.frontend: Refreshing state... [id=examhub-prod-frontend-363242104805]
+aws_s3_bucket_server_side_encryption_configuration.frontend: Refreshing state... [id=examhub-prod-frontend-363242104805]
+aws_s3_object.frontend["index.html"]: Refreshing state... [id=index.html]
+aws_s3_object.frontend["favicon.svg"]: Refreshing state... [id=favicon.svg]
+aws_s3_object.frontend["app.js"]: Refreshing state... [id=app.js]
+aws_s3_object.frontend["styles.css"]: Refreshing state... [id=styles.css]
+aws_iam_role_policy.marker: Refreshing state... [id=examhub-prod-marker:marker]
+aws_iam_role_policy_attachment.xray["api"]: Refreshing state... [id=examhub-prod-api-20261119091108525600000006]
+aws_iam_role_policy_attachment.xray["migrate"]: Refreshing state... [id=examhub-prod-migrate-2026111909110956380000000b]
+aws_iam_role_policy_attachment.xray["marker"]: Refreshing state... [id=examhub-prod-marker-20261119091106832100000002]
+aws_iam_role_policy_attachment.xray["notifier"]: Refreshing state... [id=examhub-prod-notifier-20261119091108645600000008]
+aws_iam_role_policy_attachment.vpc["marker"]: Refreshing state... [id=examhub-prod-marker-20261119091107117000000003]
+aws_iam_role_policy_attachment.vpc["notifier"]: Refreshing state... [id=examhub-prod-notifier-20261119091107772200000004]
+aws_iam_role_policy_attachment.vpc["migrate"]: Refreshing state... [id=examhub-prod-migrate-20261119091107855800000005]
+aws_iam_role_policy_attachment.vpc["api"]: Refreshing state... [id=examhub-prod-api-20261119091108537800000007]
+aws_iam_role_policy.db_access["api"]: Refreshing state... [id=examhub-prod-api:db-access]
+aws_iam_role_policy.db_access["marker"]: Refreshing state... [id=examhub-prod-marker:db-access]
+aws_iam_role_policy.db_access["migrate"]: Refreshing state... [id=examhub-prod-migrate:db-access]
+aws_iam_role_policy.db_access["notifier"]: Refreshing state... [id=examhub-prod-notifier:db-access]
+aws_sqs_queue_policy.notify: Refreshing state... [id=https://sqs.ap-south-1.amazonaws.com/363242104805/examhub-prod-notify]
+aws_s3_bucket_ownership_controls.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_s3_bucket_server_side_encryption_configuration.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_s3_bucket_public_access_block.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+data.aws_iam_policy_document.notifier: Reading...
+data.aws_iam_policy_document.notifier: Read complete after 0s [id=1378773962]
+aws_s3_bucket_versioning.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_s3_bucket_notification.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_iam_role_policy.notifier: Refreshing state... [id=examhub-prod-notifier:notifier]
+aws_s3_bucket_policy.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_cloudfront_distribution.site: Refreshing state... [id=E2I2X501B680Q2]
+aws_s3_bucket_lifecycle_configuration.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_s3_bucket_policy.frontend: Refreshing state... [id=examhub-prod-frontend-363242104805]
+aws_s3_bucket_cors_configuration.uploads: Refreshing state... [id=examhub-prod-uploads-363242104805]
+aws_cognito_user_pool.main: Refreshing state... [id=ap-south-1_qFoZibCMA]
+aws_cognito_user_group.roles["students"]: Refreshing state... [id=ap-south-1_qFoZibCMA/students]
+aws_cognito_user_group.roles["tutors"]: Refreshing state... [id=ap-south-1_qFoZibCMA/tutors]
+aws_cognito_user_pool_domain.main: Refreshing state... [id=examhub-prod-w2seqt]
+aws_cognito_user_group.roles["admins"]: Refreshing state... [id=ap-south-1_qFoZibCMA/admins]
+aws_cognito_user_pool_client.web: Refreshing state... [id=4nvjsj67u5oqdq0k1etb2adsu6]
+aws_cognito_user.demo["admin1"]: Refreshing state... [id=ap-south-1_qFoZibCMA/admin1]
+aws_cognito_user.demo["student1"]: Refreshing state... [id=ap-south-1_qFoZibCMA/student1]
+aws_cognito_user.demo["tutor1"]: Refreshing state... [id=ap-south-1_qFoZibCMA/tutor1]
+data.aws_iam_policy_document.api: Reading...
+data.aws_iam_policy_document.api: Read complete after 0s [id=2089441172]
+aws_iam_role_policy.api: Refreshing state... [id=examhub-prod-api:api]
+aws_apigatewayv2_authorizer.cognito: Refreshing state... [id=my2tm3]
+aws_s3_object.frontend_config: Refreshing state... [id=config.js]
+aws_cognito_user_in_group.demo["student1"]: Refreshing state... [id=terraform-2026111909142103020000001a]
+aws_cognito_user_in_group.demo["admin1"]: Refreshing state... [id=terraform-2026111909142103020000001c]
+aws_cognito_user_in_group.demo["tutor1"]: Refreshing state... [id=terraform-2026111909142103020000001b]
+aws_lambda_function.fn["api"]: Refreshing state... [id=examhub-prod-api]
+aws_lambda_function.fn["migrate"]: Refreshing state... [id=examhub-prod-migrate]
+aws_lambda_function.fn["marker"]: Refreshing state... [id=examhub-prod-marker]
+aws_lambda_function.fn["notifier"]: Refreshing state... [id=examhub-prod-notifier]
+aws_lambda_alias.api_live: Refreshing state... [id=arn:aws:lambda:ap-south-1:363242104805:function:examhub-prod-api:live]
+aws_lambda_event_source_mapping.notify: Refreshing state... [id=9183dbe2-eab3-4f61-b5c2-02f1f30eda65]
+aws_cloudwatch_metric_alarm.api_throttles: Refreshing state... [id=examhub-prod-api-throttles]
+aws_lambda_event_source_mapping.marking: Refreshing state... [id=c191ad17-7730-4bce-b644-f3914f2a364a]
+aws_cloudwatch_metric_alarm.lambda_errors["notifier"]: Refreshing state... [id=examhub-prod-notifier-errors]
+aws_cloudwatch_metric_alarm.lambda_errors["marker"]: Refreshing state... [id=examhub-prod-marker-errors]
+aws_cloudwatch_metric_alarm.lambda_errors["api"]: Refreshing state... [id=examhub-prod-api-errors]
+aws_lambda_permission.apigw: Refreshing state... [id=AllowApiGateway]
+aws_apigatewayv2_integration.api: Refreshing state... [id=xfwjl5f]
+aws_apigatewayv2_route.proxy: Refreshing state... [id=ogzaxxh]
+aws_apigatewayv2_route.health: Refreshing state... [id=jyy4p67]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
++/- create replacement and then destroy
+
+Terraform will perform the following actions:
+
+  # aws_backup_selection.db will be created
+  + resource "aws_backup_selection" "db" {
+      + iam_role_arn  = "arn:aws:iam::363242104805:role/examhub-prod-backup"
+      + id            = (known after apply)
+      + name          = "examhub-prod-db"
+      + not_resources = (known after apply)
+      + plan_id       = "c9eca627-8d4e-43fd-9959-77b324034a8b"
+      + resources     = (known after apply)
+
+      + condition (known after apply)
+    }
+
+  # aws_cloudwatch_dashboard.main will be created
+  + resource "aws_cloudwatch_dashboard" "main" {
+      + dashboard_arn  = (known after apply)
+      + dashboard_body = jsonencode(
+            {
+              + widgets = [
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/ApiGateway",
+                                  + "Count",
+                                  + "ApiId",
+                                  + "j70dpamywe",
+                                  + "Stage",
+                                  + "$default",
+                                ],
+                              + [
+                                  + ".",
+                                  + "4xx",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                ],
+                              + [
+                                  + ".",
+                                  + "5xx",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                ],
+                            ]
+                          + period  = 60
+                          + region  = "ap-south-1"
+                          + stat    = "Sum"
+                          + title   = "API requests and errors"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 0
+                      + y          = 0
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/ApiGateway",
+                                  + "Latency",
+                                  + "ApiId",
+                                  + "j70dpamywe",
+                                  + "Stage",
+                                  + "$default",
+                                  + {
+                                      + stat = "p50"
+                                    },
+                                ],
+                              + [
+                                  + "...",
+                                  + {
+                                      + stat = "p95"
+                                    },
+                                ],
+                            ]
+                          + period  = 60
+                          + region  = "ap-south-1"
+                          + title   = "API latency (ms)"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 12
+                      + y          = 0
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/Lambda",
+                                  + "ConcurrentExecutions",
+                                  + "FunctionName",
+                                  + "examhub-prod-api",
+                                  + {
+                                      + stat = "Maximum"
+                                    },
+                                ],
+                              + [
+                                  + ".",
+                                  + "Throttles",
+                                  + ".",
+                                  + ".",
+                                  + {
+                                      + stat = "Sum"
+                                    },
+                                ],
+                              + [
+                                  + ".",
+                                  + "Errors",
+                                  + ".",
+                                  + ".",
+                                  + {
+                                      + stat = "Sum"
+                                    },
+                                ],
+                            ]
+                          + period  = 60
+                          + region  = "ap-south-1"
+                          + title   = "Lambda concurrency / throttles"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 0
+                      + y          = 6
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/RDS",
+                                  + "CPUUtilization",
+                                  + "DBInstanceIdentifier",
+                                  + "examhub-prod-db",
+                                  + {
+                                      + stat = "Average"
+                                    },
+                                ],
+                              + [
+                                  + ".",
+                                  + "DatabaseConnections",
+                                  + ".",
+                                  + ".",
+                                  + {
+                                      + stat = "Maximum"
+                                    },
+                                ],
+                            ]
+                          + period  = 60
+                          + region  = "ap-south-1"
+                          + title   = "Database (RDS Multi-AZ)"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 12
+                      + y          = 6
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/SQS",
+                                  + "ApproximateNumberOfMessagesVisible",
+                                  + "QueueName",
+                                  + "examhub-prod-marking",
+                                ],
+                              + [
+                                  + "...",
+                                  + "examhub-prod-notify",
+                                ],
+                              + [
+                                  + "...",
+                                  + "examhub-prod-marking-dlq",
+                                ],
+                              + [
+                                  + "...",
+                                  + "examhub-prod-notify-dlq",
+                                ],
+                            ]
+                          + period  = 60
+                          + region  = "ap-south-1"
+                          + stat    = "Maximum"
+                          + title   = "Queues (visible messages)"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 0
+                      + y          = 12
+                    },
+                  + {
+                      + height     = 6
+                      + properties = {
+                          + metrics = [
+                              + [
+                                  + "AWS/WAFV2",
+                                  + "AllowedRequests",
+                                  + "WebACL",
+                                  + "examhub-prod-edge",
+                                  + "Rule",
+                                  + "ALL",
+                                ],
+                              + [
+                                  + ".",
+                                  + "BlockedRequests",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                  + ".",
+                                ],
+                            ]
+                          + period  = 300
+                          + region  = "us-east-1"
+                          + stat    = "Sum"
+                          + title   = "WAF allowed vs blocked"
+                        }
+                      + type       = "metric"
+                      + width      = 12
+                      + x          = 12
+                      + y          = 12
+                    },
+                ]
+            }
+        )
+      + dashboard_name = "examhub-prod"
+      + id             = (known after apply)
+    }
+
+  # aws_cloudwatch_metric_alarm.db_connections will be created
+  + resource "aws_cloudwatch_metric_alarm" "db_connections" {
+      + actions_enabled                       = true
+      + alarm_actions                         = [
+          + "arn:aws:sns:ap-south-1:363242104805:examhub-prod-alarms",
+        ]
+      + alarm_description                     = "Database connections are close to max_connections - Lambda concurrency is outgrowing the instance"
+      + alarm_name                            = "examhub-prod-db-connections-high"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "DBInstanceIdentifier" = "examhub-prod-db"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 3
+      + id                                    = (known after apply)
+      + metric_name                           = "DatabaseConnections"
+      + namespace                             = "AWS/RDS"
+      + period                                = 60
+      + statistic                             = "Maximum"
+      + tags_all                              = {
+          + "Course"      = "DSO303"
+          + "Environment" = "prod"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "examhub"
+        }
+      + threshold                             = 70
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # aws_cloudwatch_metric_alarm.db_cpu will be created
+  + resource "aws_cloudwatch_metric_alarm" "db_cpu" {
+      + actions_enabled                       = true
+      + alarm_actions                         = [
+          + "arn:aws:sns:ap-south-1:363242104805:examhub-prod-alarms",
+        ]
+      + alarm_description                     = "Database CPU is high - scale up db_instance_class before the next exam"
+      + alarm_name                            = "examhub-prod-db-cpu-high"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "DBInstanceIdentifier" = "examhub-prod-db"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 2
+      + id                                    = (known after apply)
+      + metric_name                           = "CPUUtilization"
+      + namespace                             = "AWS/RDS"
+      + period                                = 300
+      + statistic                             = "Average"
+      + tags_all                              = {
+          + "Course"      = "DSO303"
+          + "Environment" = "prod"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "examhub"
+        }
+      + threshold                             = 80
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # aws_db_instance.main will be created
+  + resource "aws_db_instance" "main" {
+      + address                               = (known after apply)
+      + allocated_storage                     = 20
+      + allow_major_version_upgrade           = false
+      + apply_immediately                     = true
+      + arn                                   = (known after apply)
+      + auto_minor_version_upgrade            = true
+      + availability_zone                     = (known after apply)
+      + backup_retention_period               = 1
+      + backup_target                         = (known after apply)
+      + backup_window                         = "18:00-19:00"
+      + ca_cert_identifier                    = (known after apply)
+      + character_set_name                    = (known after apply)
+      + copy_tags_to_snapshot                 = true
+      + database_insights_mode                = (known after apply)
+      + db_name                               = "exams"
+      + db_subnet_group_name                  = "examhub-prod-db"
+      + dedicated_log_volume                  = false
+      + delete_automated_backups              = true
+      + deletion_protection                   = false
+      + domain_fqdn                           = (known after apply)
+      + enabled_cloudwatch_logs_exports       = [
+          + "postgresql",
+        ]
+      + endpoint                              = (known after apply)
+      + engine                                = "postgres"
+      + engine_lifecycle_support              = (known after apply)
+      + engine_version                        = "17"
+      + engine_version_actual                 = (known after apply)
+      + hosted_zone_id                        = (known after apply)
+      + id                                    = (known after apply)
+      + identifier                            = "examhub-prod-db"
+      + identifier_prefix                     = (known after apply)
+      + instance_class                        = "db.t4g.micro"
+      + iops                                  = (known after apply)
+      + kms_key_id                            = "arn:aws:kms:ap-south-1:363242104805:key/88fa31fe-8af9-476e-abc9-2acad6e3649b"
+      + latest_restorable_time                = (known after apply)
+      + license_model                         = (known after apply)
+      + listener_endpoint                     = (known after apply)
+      + maintenance_window                    = "sun:19:30-sun:20:30"
+      + master_user_secret                    = (known after apply)
+      + master_user_secret_kms_key_id         = (known after apply)
+      + monitoring_interval                   = 0
+      + monitoring_role_arn                   = (known after apply)
+      + multi_az                              = true
+      + nchar_character_set_name              = (known after apply)
+      + network_type                          = (known after apply)
+      + option_group_name                     = (known after apply)
+      + parameter_group_name                  = "examhub-prod-pg17"
+      + password                              = (sensitive value)
+      + password_wo                           = (write-only attribute)
+      + performance_insights_enabled          = false
+      + performance_insights_kms_key_id       = (known after apply)
+      + performance_insights_retention_period = (known after apply)
+      + port                                  = 5432
+      + publicly_accessible                   = false
+      + replica_mode                          = (known after apply)
+      + replicas                              = (known after apply)
+      + resource_id                           = (known after apply)
+      + skip_final_snapshot                   = true
+      + snapshot_identifier                   = (known after apply)
+      + status                                = (known after apply)
+      + storage_encrypted                     = true
+      + storage_throughput                    = (known after apply)
+      + storage_type                          = "gp3"
+      + tags_all                              = {
+          + "Course"      = "DSO303"
+          + "Environment" = "prod"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "examhub"
+        }
+      + timezone                              = (known after apply)
+      + username                              = "examadmin"
+      + vpc_security_group_ids                = (known after apply)
+    }
+
+  # aws_db_parameter_group.main will be updated in-place
+  ~ resource "aws_db_parameter_group" "main" {
+        id           = "examhub-prod-pg17"
+        name         = "examhub-prod-pg17"
+        tags         = {}
+        # (6 unchanged attributes hidden)
+
+      - parameter {
+          - apply_method = "pending-reboot" -> null
+          - name         = "rds.force_ssl" -> null
+          - value        = "1" -> null
+        }
+      + parameter {
+          + apply_method = "immediate"
+          + name         = "rds.force_ssl"
+          + value        = "1"
+        }
+
+        # (1 unchanged block hidden)
+    }
+
+  # aws_lambda_invocation.migrate will be created
+  + resource "aws_lambda_invocation" "migrate" {
+      + function_name   = "examhub-prod-migrate"
+      + id              = (known after apply)
+      + input           = jsonencode(
+            {
+              + action       = "migrate"
+              + code_version = "vdXdcmCBI/v1XrrL6GuUiexNMdSanOQlCPg7J+rp0jQ="
+              + seed         = {
+                  + tutor_email = "<your-email>"
+                  + tutor_name  = "tutor1"
+                  + tutor_sub   = "81136d9a-2061-7066-eac8-46e5b4db5d3c"
+                }
+            }
+        )
+      + lifecycle_scope = "CREATE_ONLY"
+      + qualifier       = "$LATEST"
+      + result          = (known after apply)
+      + terraform_key   = "tf"
+    }
+
+  # aws_secretsmanager_secret_version.db will be created
+  + resource "aws_secretsmanager_secret_version" "db" {
+      + arn                  = (known after apply)
+      + has_secret_string_wo = (known after apply)
+      + id                   = (known after apply)
+      + secret_id            = "arn:aws:secretsmanager:ap-south-1:363242104805:secret:examhub-prod/db-master-20261123121328530200000001-aNobMj"
+      + secret_string        = (sensitive value)
+      + secret_string_wo     = (write-only attribute)
+      + version_id           = (known after apply)
+      + version_stages       = (known after apply)
+    }
+
+  # aws_security_group.db must be replaced
++/- resource "aws_security_group" "db" {
+      ~ arn                    = "arn:aws:ec2:ap-south-1:363242104805:security-group/sg-0f5f5b42293568bfe" -> (known after apply)
+      ~ description            = "Aurora PostgreSQL - reachable only from the Lambda security group" -> "RDS PostgreSQL - reachable only from the Lambda security group" # forces replacement
+      ~ egress                 = [] -> (known after apply)
+      ~ id                     = "sg-0f5f5b42293568bfe" -> (known after apply)
+      ~ ingress                = [] -> (known after apply)
+      ~ name                   = "examhub-prod-aurora" -> (known after apply)
+      + name_prefix            = "examhub-prod-db-" # forces replacement
+      ~ owner_id               = "363242104805" -> (known after apply)
+      ~ tags                   = {
+          ~ "Name" = "examhub-prod-aurora-sg" -> "examhub-prod-db-sg"
+        }
+      ~ tags_all               = {
+          ~ "Name"        = "examhub-prod-aurora-sg" -> "examhub-prod-db-sg"
+            # (4 unchanged elements hidden)
+        }
+        # (2 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_egress_rule.lambda_db will be updated in-place
+  ~ resource "aws_vpc_security_group_egress_rule" "lambda_db" {
+      ~ description                  = "PostgreSQL to Aurora" -> "PostgreSQL to RDS"
+        id                           = "sgr-08fe577951fd87151"
+      ~ referenced_security_group_id = "sg-0f5f5b42293568bfe" -> (known after apply)
+        # (7 unchanged attributes hidden)
+    }
+
+  # aws_vpc_security_group_ingress_rule.db_from_lambda will be created
+  + resource "aws_vpc_security_group_ingress_rule" "db_from_lambda" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL from Lambda"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = "sg-03c3e6aaec1019a3a"
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"      = "DSO303"
+          + "Environment" = "prod"
+          + "ManagedBy"   = "terraform"
+          + "Project"     = "examhub"
+        }
+      + to_port                      = 5432
+    }
+
+Plan: 9 to add, 2 to change, 1 to destroy.
+
+Changes to Outputs:
+  + db_primary_az              = (known after apply)
+  + migration_result           = (known after apply)
+aws_security_group.db: Creating...
+aws_db_parameter_group.main: Modifying... [id=examhub-prod-pg17]
+aws_db_parameter_group.main: Modifications complete after 1s [id=examhub-prod-pg17]
+aws_security_group.db: Creation complete after 4s [id=sg-04d7edeafd25e45b7]
+aws_vpc_security_group_ingress_rule.db_from_lambda: Creating...
+aws_db_instance.main: Creating...
+aws_vpc_security_group_egress_rule.lambda_db: Modifying... [id=sgr-08fe577951fd87151]
+aws_vpc_security_group_ingress_rule.db_from_lambda: Creation complete after 0s [id=sgr-0b13c5b69e4bfaac7]
+aws_vpc_security_group_egress_rule.lambda_db: Modifications complete after 0s [id=sgr-08fe577951fd87151]
+aws_db_instance.main: Still creating... [00m10s elapsed]
+aws_db_instance.main: Still creating... [00m20s elapsed]
+aws_db_instance.main: Still creating... [00m30s elapsed]
+aws_db_instance.main: Still creating... [00m40s elapsed]
+aws_db_instance.main: Still creating... [00m50s elapsed]
+aws_db_instance.main: Still creating... [01m00s elapsed]
+aws_db_instance.main: Still creating... [01m10s elapsed]
+aws_db_instance.main: Still creating... [01m20s elapsed]
+aws_db_instance.main: Still creating... [01m30s elapsed]
+aws_db_instance.main: Still creating... [01m40s elapsed]
+aws_db_instance.main: Still creating... [01m50s elapsed]
+aws_db_instance.main: Still creating... [02m00s elapsed]
+aws_db_instance.main: Still creating... [02m10s elapsed]
+aws_db_instance.main: Still creating... [02m20s elapsed]
+aws_db_instance.main: Still creating... [02m30s elapsed]
+aws_db_instance.main: Still creating... [02m40s elapsed]
+aws_db_instance.main: Still creating... [02m50s elapsed]
+aws_db_instance.main: Still creating... [03m00s elapsed]
+aws_db_instance.main: Still creating... [03m10s elapsed]
+aws_db_instance.main: Still creating... [03m20s elapsed]
+aws_db_instance.main: Still creating... [03m30s elapsed]
+aws_db_instance.main: Still creating... [03m40s elapsed]
+aws_db_instance.main: Still creating... [03m50s elapsed]
+aws_db_instance.main: Still creating... [04m00s elapsed]
+aws_db_instance.main: Still creating... [04m10s elapsed]
+aws_db_instance.main: Still creating... [04m20s elapsed]
+aws_db_instance.main: Still creating... [04m30s elapsed]
+aws_db_instance.main: Still creating... [04m40s elapsed]
+aws_db_instance.main: Still creating... [04m50s elapsed]
+aws_db_instance.main: Still creating... [05m00s elapsed]
+aws_db_instance.main: Still creating... [05m10s elapsed]
+aws_db_instance.main: Still creating... [05m20s elapsed]
+aws_db_instance.main: Still creating... [05m30s elapsed]
+aws_db_instance.main: Still creating... [05m40s elapsed]
+aws_db_instance.main: Still creating... [05m50s elapsed]
+aws_db_instance.main: Still creating... [06m00s elapsed]
+aws_db_instance.main: Still creating... [06m10s elapsed]
+aws_db_instance.main: Still creating... [06m20s elapsed]
+aws_db_instance.main: Still creating... [06m30s elapsed]
+aws_db_instance.main: Still creating... [06m40s elapsed]
+aws_db_instance.main: Still creating... [06m50s elapsed]
+aws_db_instance.main: Still creating... [07m00s elapsed]
+aws_db_instance.main: Still creating... [07m10s elapsed]
+aws_db_instance.main: Still creating... [07m20s elapsed]
+aws_db_instance.main: Still creating... [07m30s elapsed]
+aws_db_instance.main: Still creating... [07m40s elapsed]
+aws_db_instance.main: Still creating... [07m50s elapsed]
+aws_db_instance.main: Still creating... [08m00s elapsed]
+aws_db_instance.main: Still creating... [08m10s elapsed]
+aws_db_instance.main: Still creating... [08m20s elapsed]
+aws_db_instance.main: Still creating... [08m30s elapsed]
+aws_db_instance.main: Still creating... [08m40s elapsed]
+aws_db_instance.main: Still creating... [08m50s elapsed]
+aws_db_instance.main: Still creating... [09m00s elapsed]
+aws_db_instance.main: Still creating... [09m10s elapsed]
+aws_db_instance.main: Still creating... [09m20s elapsed]
+aws_db_instance.main: Still creating... [09m30s elapsed]
+aws_db_instance.main: Still creating... [09m40s elapsed]
+aws_db_instance.main: Still creating... [09m50s elapsed]
+aws_db_instance.main: Still creating... [10m00s elapsed]
+aws_db_instance.main: Still creating... [10m10s elapsed]
+aws_db_instance.main: Still creating... [10m20s elapsed]
+aws_db_instance.main: Still creating... [10m30s elapsed]
+aws_db_instance.main: Still creating... [10m40s elapsed]
+aws_db_instance.main: Still creating... [10m50s elapsed]
+aws_db_instance.main: Still creating... [11m00s elapsed]
+aws_db_instance.main: Still creating... [11m10s elapsed]
+aws_db_instance.main: Still creating... [11m20s elapsed]
+aws_db_instance.main: Still creating... [11m30s elapsed]
+aws_db_instance.main: Still creating... [11m40s elapsed]
+aws_db_instance.main: Still creating... [11m50s elapsed]
+aws_db_instance.main: Still creating... [12m00s elapsed]
+aws_db_instance.main: Still creating... [12m10s elapsed]
+aws_db_instance.main: Still creating... [12m20s elapsed]
+aws_db_instance.main: Still creating... [12m30s elapsed]
+aws_db_instance.main: Still creating... [12m40s elapsed]
+aws_db_instance.main: Still creating... [12m50s elapsed]
+aws_db_instance.main: Still creating... [13m00s elapsed]
+aws_db_instance.main: Still creating... [13m10s elapsed]
+aws_db_instance.main: Still creating... [13m20s elapsed]
+aws_db_instance.main: Still creating... [13m30s elapsed]
+aws_db_instance.main: Still creating... [13m40s elapsed]
+aws_db_instance.main: Still creating... [13m50s elapsed]
+aws_db_instance.main: Still creating... [14m00s elapsed]
+aws_db_instance.main: Still creating... [14m10s elapsed]
+aws_db_instance.main: Still creating... [14m20s elapsed]
+aws_db_instance.main: Still creating... [14m30s elapsed]
+aws_db_instance.main: Still creating... [14m40s elapsed]
+aws_db_instance.main: Still creating... [14m50s elapsed]
+aws_db_instance.main: Still creating... [15m00s elapsed]
+aws_db_instance.main: Still creating... [15m10s elapsed]
+aws_db_instance.main: Still creating... [15m20s elapsed]
+aws_db_instance.main: Still creating... [15m30s elapsed]
+aws_db_instance.main: Still creating... [15m40s elapsed]
+aws_db_instance.main: Still creating... [15m50s elapsed]
+aws_db_instance.main: Still creating... [16m00s elapsed]
+aws_db_instance.main: Still creating... [16m10s elapsed]
+aws_db_instance.main: Still creating... [16m20s elapsed]
+aws_db_instance.main: Still creating... [16m30s elapsed]
+aws_db_instance.main: Still creating... [16m40s elapsed]
+aws_db_instance.main: Still creating... [16m52s elapsed]
+aws_db_instance.main: Still creating... [17m02s elapsed]
+aws_db_instance.main: Still creating... [17m12s elapsed]
+aws_db_instance.main: Creation complete after 17m20s [id=db-4ZJFKH7YA3UEKWHCGCDSUWL3TU]
+aws_secretsmanager_secret_version.db: Creating...
+aws_backup_selection.db: Creating...
+aws_cloudwatch_metric_alarm.db_connections: Creating...
+aws_cloudwatch_metric_alarm.db_cpu: Creating...
+aws_cloudwatch_dashboard.main: Creating...
+aws_secretsmanager_secret_version.db: Creation complete after 1s [id=arn:aws:secretsmanager:ap-south-1:363242104805:secret:examhub-prod/db-master-20261123121328530200000001-aNobMj|terraform-20261123135546021600000002]
+aws_lambda_invocation.migrate: Creating...
+aws_cloudwatch_metric_alarm.db_cpu: Creation complete after 1s [id=examhub-prod-db-cpu-high]
+aws_backup_selection.db: Creation complete after 1s [id=fb1acc45-898a-4c78-a5a8-3ba57e0fd88b]
+aws_cloudwatch_metric_alarm.db_connections: Creation complete after 1s [id=examhub-prod-db-connections-high]
+aws_cloudwatch_dashboard.main: Creation complete after 3s [id=examhub-prod]
+aws_lambda_invocation.migrate: Creation complete after 2s [id=examhub-prod-migrate_$LATEST_4c65875a7ef8f12de466bb82597260ca]
+aws_security_group.db (deposed object e808bb8c): Destroying... [id=sg-0f5f5b42293568bfe]
+aws_security_group.db: Destruction complete after 2s
+Releasing state lock. This may take a few moments...
+
+Apply complete! Resources: 9 added, 2 changed, 1 destroyed.
+
+Outputs:
+
+api_gateway_endpoint = "https://j70dpamywe.execute-api.ap-south-1.amazonaws.com"
+api_health_url = "https://d3dyid6yjzypgx.cloudfront.net/api/health"
+cloudfront_distribution_id = "E2I2X501B680Q2"
+cognito_hosted_ui = "https://examhub-prod-w2seqt.auth.ap-south-1.amazoncognito.com"
+dashboard_url = "https://ap-south-1.console.aws.amazon.com/cloudwatch/home?region=ap-south-1#dashboards:name=examhub-prod"
+db_instance_id = "examhub-prod-db"
+db_primary_az = "ap-south-1b"
+demo_credentials = <sensitive>
+frontend_bucket = "examhub-prod-frontend-363242104805"
+migration_result = {
+  "seed" = "seeded demo exam and assignment"
+  "statements" = 11
+  "status" = "ok"
+}
+site_url = "https://d3dyid6yjzypgx.cloudfront.net"
+uploads_bucket = "examhub-prod-uploads-363242104805"
+user_pool_id = "ap-south-1_qFoZibCMA"
+
+Site:        https://d3dyid6yjzypgx.cloudfront.net
+Health:      https://d3dyid6yjzypgx.cloudfront.net/api/health?deep=1
+Credentials: terraform -chdir=infra output -json demo_credentials
+
+GitHub settings for CI/CD (Settings > Secrets and variables > Actions):
+  variable AWS_DEPLOY_ROLE_ARN = arn:aws:iam::363242104805:role/examhub-github-deploy
+  variable AWS_PLAN_ROLE_ARN   = arn:aws:iam::363242104805:role/examhub-github-plan
+  variable TF_STATE_BUCKET     = examhub-tfstate-363242104805
+  secret   NOTIFICATION_EMAIL  = <your-email>
+WARNING: Error parsing dependencies of pydantic: No package metadata was found.
+WARNING: Error parsing dependencies of certifi: No package metadata was found.
+WARNING: Error parsing dependencies of pydantic-core: No package metadata was found.
+WARNING: Error parsing dependencies of annotated-types: No package metadata was found.
+WARNING: Error parsing dependencies of typing-inspection: No package metadata was found.
+WARNING: Error parsing dependencies of typing-extensions: No package metadata was found.
+
+[exit code 0]

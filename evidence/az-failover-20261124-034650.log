@@ -1,0 +1,29 @@
+21:46:51 primary: ap-south-1b   standby: ap-south-1a   status: available
+{"status": "ok", "time": "2026-11-23T21:46:52.402708+00:00", "db": "ok", "db_time": "2026-11-23T21:46:52Z"}
+21:46:52 simulating loss of ap-south-1b -> reboot-db-instance --force-failover
+21:46:54 +0s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:46:56 +3s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:46:59 +6s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:02 +9s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:05 +12s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:18 +24s  /api/health -> 000 (timeout)   primary=ap-south-1b  status=rebooting
+21:47:22 +28s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:24 +31s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:27 +34s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:30 +37s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:33 +39s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:36 +42s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:39 +45s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:42 +48s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:44 +51s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:47 +54s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:50 +56s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:53 +59s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:56 +62s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:47:59 +65s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:48:01 +68s  /api/health -> 200   primary=ap-south-1b  status=rebooting
+21:48:04 +71s  /api/health -> 200   primary=ap-south-1b  status=available
+21:48:05 primary after: ap-south-1b   standby: ap-south-1a   status: available
+Failover took: 72 s (RTO target 1 h: met)
+Degraded window: 2 s (API retries + the browser's local answer buffer cover this)
+RPO: the standby is written synchronously in the other AZ -> 0 committed answers lost.

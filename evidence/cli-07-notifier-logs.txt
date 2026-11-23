@@ -1,0 +1,5 @@
+$ aws logs tail /aws/lambda/examhub-prod-notifier --since 2h --format short | grep -E '"msg"'
+2026-11-23T21:58:17 {"level": "info", "msg": "upload processed", "submission_id": "5bcdb9d9-8252-40e9-a9ae-ea3865bdecc5", "status": "uploaded", "size": 41943049}
+2026-11-23T22:26:35 {"level": "info", "msg": "results emails processed", "exam_id": "e61a0b48-10e2-4bac-81b7-f6ace211b59c", "count": 1}
+
+[exit code 0]
