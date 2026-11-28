@@ -1,0 +1,40 @@
+$ gh run list --limit 3 && gh run view 45287839636
+completed	failure	Add scripts for deployment, destruction, and load testing	ci-cd	main	push	45287839636	20s	2026-11-23T23:19:47Z
+
+X main ci-cd · 45287839636
+Triggered via push about 4 days ago
+
+JOBS
+✓ test in 10s (ID 138088677223)
+X deploy in 5s (ID 138088787506)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  X Run aws-actions/configure-aws-credentials@v4
+  - Run actions/setup-python@v5
+  - Build Lambda layer
+  - Run hashicorp/setup-terraform@v3
+  - Init
+  - Apply
+  - Invalidate CloudFront cache
+  - Smoke test
+  - Summary
+  ✓ Post Run aws-actions/configure-aws-credentials@v4
+  ✓ Post Run actions/checkout@v4
+  ✓ Complete job
+- plan (ID 138088790519)
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/setup-python@v5, hashicorp/setup-terraform@v3. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+test: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, aws-actions/configure-aws-credentials@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+deploy: .github#2
+
+X Credentials could not be loaded, please check your action inputs: Could not load credentials from any providers
+deploy: .github#12
+
+
+To see what failed, try: gh run view 45287839636 --log-failed
+View this run on GitHub: https://github.com/Wangpos/DSO303_Assignment2/actions/runs/45287839636
+
+[exit code 0]

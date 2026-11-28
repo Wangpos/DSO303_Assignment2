@@ -35,7 +35,7 @@ def git_status():
 
 def prompt_svg(y, width_chars, branch, modified, untracked, when):
     """Two-line prompt: ╭─ path  branch !M ?U ······ base  system  time  /  ╰─❯"""
-    left = [("╭─ ", DIM), ("~/Desktop/DSO303_Assignment2", BLUE), ("  ", FG), (branch, GREEN)]
+    left = [("╭─ ", DIM), ("~/Desktop/Files 2026/DSO303_Assignment2", BLUE), ("  ", FG), (branch, GREEN)]
     if modified:
         left.append((f" !{modified}", YELLOW))
     if untracked:

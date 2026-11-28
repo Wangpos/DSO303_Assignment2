@@ -1,0 +1,15 @@
+$ grep -n 'aws_cognito_user_group' evidence/cli-03-deploy.txt; sed -n 58,66p infra/auth.tf
+190:aws_cognito_user_group.roles["students"]: Refreshing state... [id=ap-south-1_qFoZibCMA/students]
+191:aws_cognito_user_group.roles["tutors"]: Refreshing state... [id=ap-south-1_qFoZibCMA/tutors]
+193:aws_cognito_user_group.roles["admins"]: Refreshing state... [id=ap-south-1_qFoZibCMA/admins]
+    admins   = 1
+    tutors   = 2
+    students = 3
+  }
+  name         = each.key
+  user_pool_id = aws_cognito_user_pool.main.id
+  precedence   = each.value
+  description  = "${title(each.key)} role"
+}
+
+[exit code 0]

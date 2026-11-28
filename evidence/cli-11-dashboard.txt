@@ -1,0 +1,12 @@
+$ grep -n 'aws_cloudwatch_dashboard.main' evidence/cli-03-deploy.txt; grep -nE '"title"|title +=' infra/monitoring.tf
+242:  # aws_cloudwatch_dashboard.main will be created
+822:aws_cloudwatch_dashboard.main: Creating...
+828:aws_cloudwatch_dashboard.main: Creation complete after 3s [id=examhub-prod]
+156:          title  = "API requests and errors"
+170:          title  = "API latency (ms)"
+182:          title  = "Lambda concurrency / throttles"
+195:          title  = "Database (RDS Multi-AZ)"
+207:          title  = "Queues (visible messages)"
+222:          title  = "WAF allowed vs blocked"
+
+[exit code 0]

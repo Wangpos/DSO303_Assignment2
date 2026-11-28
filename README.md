@@ -39,6 +39,182 @@ The diagram and [docs/services.md](docs/services.md) describe the production des
 
 Everything else (edge, auth, API, Lambda, S3, SQS, SES, monitoring, backup, CI/CD) is identical to the design.
 
+## Report: deployment evidence
+
+The platform was deployed to **ap-south-1 (Mumbai)** with `scripts/deploy.sh` and tested end to end with the three demo users. Each section below matches one part of the architecture and shows the evidence for it. Most images are AWS Console or browser screenshots of the live system. The `cli-*` images are terminal output from real commands; the `.txt` file with the same name holds the full log.
+
+> **Note on items 7.2–7.5.** Console access to the account was lost after the deployment (IAM sign-in and CLI keys both rejected). The Cognito, WAF, Secrets Manager/KMS and dashboard evidence is therefore taken from the Terraform deploy log (real resource IDs created in the account) together with the Terraform configuration that set them up, not from the console.
+
+### 1. Infrastructure as code
+
+The whole platform is defined in Terraform under `infra/`. Before deploying, the backend unit tests and Terraform validation both pass.
+
+![Unit tests](evidence/cli-01-unit-tests.png)
+*19 backend unit tests pass (database conversions, exam validation, roles, routing, MCQ scoring, upload validation).*
+
+![Terraform validate](evidence/cli-02-terraform-validate.png)
+*`terraform fmt -check`, and `terraform validate` for both `infra/` and `infra/bootstrap/`, succeed.*
+
+![Deploy](evidence/cli-03-deploy.png)
+*`scripts/deploy.sh` finishes with `Apply complete!` and prints the site URL and the GitHub CI/CD settings.*
+
+**Troubleshooting during deployment.** The first attempts used Aurora PostgreSQL Serverless v2 as designed and were rejected by the AWS Free plan:
+
+| Attempt | Error | Response |
+|---|---|---|
+| [cli-03a](evidence/cli-03a-deploy-failed-free-plan.png) | `FreeTierRestrictionError`: backup retention above the Free-plan maximum | Lowered retention to 1 day |
+| [cli-03b](evidence/cli-03b-deploy-failed-acu-limit.png) | `FreeTierRestrictionError`: maximum capacity above 4 ACUs | Lowered max ACU |
+| [cli-03c](evidence/cli-03c-deploy-failed-express-config.png) | Aurora on the Free plan requires `WithExpressConfiguration` (single instance, outside the VPC) | Not acceptable for the private, two-AZ requirement, so the database tier was switched to **RDS PostgreSQL Multi-AZ** |
+| [cli-03d](evidence/cli-03d-deploy-failed-network.png) | `no such host` (local network dropped mid-apply) | Re-ran the deploy; Terraform resumed from remote state |
+
+### 2. Frontend and edge (CloudFront)
+
+![Landing page](evidence/aws-site-login.png)
+*The single-page app served over HTTPS from the CloudFront domain.*
+
+![CloudFront origins](evidence/aws-cloudfront.png)
+*CloudFront has two origins: `frontend-s3` (private S3 bucket reached through Origin Access Control) for `/`, and `api` (API Gateway) for `/api/*`. AWS WAF is attached to the distribution.*
+
+### 3. Walkthrough 1: sitting an exam with autosave
+
+**Student view.** `student1` signs in through Cognito and sees the exams and assignments open to them.
+
+![Student dashboard](evidence/aws-student-dashboard.png)
+*The student dashboard lists the seeded exam (with its window and duration) and the assignment upload.*
+
+![Exam autosave](evidence/aws-exam-autosave.png)
+*During the exam the page shows "Saved 3 answer(s) at …" and the countdown timer.*
+
+![Autosave network](evidence/aws-autosave-network.png)
+*Browser DevTools: each autosave is a `PUT …/answers` request that returns **200** in about 225–265 ms.*
+
+**Request path.** Browser → CloudFront → API Gateway → `examhub-prod-api` Lambda → RDS.
+
+![API Gateway routes](evidence/aws-api-gateway.png)
+*HTTP API `examhub-prod-api`: the public `GET /api/health` and `ANY /api/{proxy+}`, which is protected by the Cognito JWT authorizer and integrated with the API Lambda.*
+
+![Lambda functions](evidence/aws-lambda-functions.png)
+*Four Python 3.13 functions: `api` (HTTP API), `marker` (auto-marks MCQs from the marking queue), `notifier` (verifies uploads and sends SES email) and `migrate` (schema and seed data).*
+
+![Lambda VPC](evidence/aws-lambda-vpc.png)
+*The API Lambda runs in `examhub-prod-vpc` (10.20.0.0/16) in two private app subnets, **10.20.10.0/24 in ap-south-1a** and **10.20.11.0/24 in ap-south-1b**, with security group `examhub-prod-lambda-sg`.*
+
+### 4. Two-AZ database and failover
+
+![RDS before failover](evidence/aws-rds-two-az.png)
+*RDS `examhub-prod-db`: PostgreSQL 17.9, **Multi-AZ: Yes**, with the standby in a different AZ (secondary zone ap-south-1a).*
+
+![RDS configuration](evidence/aws-rds-config.png)
+*Storage encryption is enabled with the customer-managed KMS key `examhub-prod`. Storage is 20 GiB gp3 and logs are published to CloudWatch.*
+
+**Simulated loss of an AZ.** `scripts/simulate-az-failure.sh` forces a Multi-AZ failover (`reboot-db-instance --force-failover`) while calling `/api/health` every 3 seconds.
+
+![AZ failover](evidence/cli-04-az-failover.png)
+*The primary moved from ap-south-1b to ap-south-1a. The API kept answering 200 throughout, apart from one timed-out health check.*
+
+| Measure | Result | Target |
+|---|---|---|
+| Failover time | **72 s** | RTO ≤ 1 h ✅ |
+| Health checks failed | 1 (single timeout at +24 s) | Covered by API retries and the browser's local answer buffer |
+| Data lost | 0 committed answers (synchronous standby) | RPO ≤ 5 min ✅ |
+
+![RDS events](evidence/aws-rds-after-failover.png)
+*RDS events: "Multi-AZ instance failover started", "failover completed", "DB instance restarted". Earlier events show the conversion to Multi-AZ and the automated backups.*
+
+![RDS after failover](evidence/aws-rds-after-failover-2.png)
+*After the failover the standby is in ap-south-1b: the two AZs swapped roles.*
+
+### 5. Walkthrough 2: 40 MB assignment upload and tutor notification
+
+The browser asks the API for a presigned POST and uploads the file **directly to S3**, so large files never pass through Lambda. The S3 event goes to the `notify` queue, and the notifier Lambda checks the file and emails the tutor.
+
+![Upload](evidence/aws-upload-40mb.png)
+*After the upload the submission shows "uploaded: report.pdf".*
+
+![S3 object](evidence/aws-s3-object.png)
+*The 40.0 MB `report.pdf` stored under `submissions/<assignment-id>/<submission-id>/` in the uploads bucket.*
+
+![S3 lifecycle](evidence/aws-s3-lifecycle.png)
+*Lifecycle rule `submissions-5-year-retention`: Standard-IA at day 30, Glacier Instant Retrieval at day 180, Glacier Deep Archive at day 730, and expiry at day 1,826 (5 years). Old versions are deleted after 30 days.*
+
+![Tutor email](evidence/aws-tutor-email.png)
+*SES email to the tutor: "student1 submitted 'report.pdf' (40.0 MB) for 'Demo: Architecture Report'".*
+
+![Tutor submissions](evidence/aws-tutor-submissions.png)
+*The tutor's submissions page lists the file, its size, upload time and status, with a presigned download.*
+
+### 6. Asynchronous marking and results release
+
+![SQS queues](evidence/aws-sqs-queues.png)
+*Four queues: `marking` and `notify`, each with a dead-letter queue. All are encrypted with SSE-SQS and were empty after processing.*
+
+![Marking](evidence/aws-marking.png)
+*After submission the `marker` Lambda auto-marked the MCQs (2 marks, status "auto marked"). The tutor then marks the short answer.*
+
+![Results email](evidence/aws-results-email.png)
+*When the tutor releases results, the student receives a "Results released" email through SES.*
+
+![Student result](evidence/aws-student-result.png)
+*The student now sees "Result: 2 / 5". The second exam is still "Submitted – awaiting results".*
+
+![Notifier logs](evidence/cli-07-notifier-logs.png)
+*Structured JSON logs from the notifier Lambda for both jobs: `upload processed` (size 41,943,049 bytes) and `results emails processed`.*
+
+### 7. Administration, security and monitoring
+
+#### 7.1 User administration
+
+![Admin users](evidence/aws-admin-users.png)
+*`admin1` manages users: creating a user in Cognito sends them a temporary password. The three demo users are CONFIRMED in their roles.*
+
+#### 7.2 Cognito groups
+
+![Cognito groups](evidence/cli-08-cognito-groups.png)
+*The groups `students`, `tutors` and `admins` exist in user pool `ap-south-1_qFoZibCMA`, with precedence admins 1, tutors 2, students 3. The API reads the group from the JWT to decide what a user may do.*
+
+#### 7.3 AWS WAF
+
+![WAF rules](evidence/cli-09-waf-rules.png)
+*Web ACL `examhub-prod-edge` (CLOUDFRONT scope) with three AWS managed rule sets (Common, Known Bad Inputs, IP Reputation) and a per-IP rate limit.*
+
+#### 7.4 Secrets Manager and KMS
+
+![Secrets and KMS](evidence/cli-10-secrets-kms.png)
+*The database credentials and the CloudFront origin-verify header are stored in Secrets Manager under `examhub-prod/…`. The customer-managed KMS key has automatic key rotation enabled.*
+
+#### 7.5 CloudWatch dashboard and alarms
+
+![Dashboard](evidence/cli-11-dashboard.png)
+*The `examhub-prod` dashboard was created with six graphs: API requests and errors, API latency, Lambda concurrency and throttles, database, queues, and WAF allowed vs blocked.*
+
+![CloudWatch overview](evidence/aws-cloudwatch-overview.png)
+*CloudWatch overview: 11 alarms across API Gateway, Lambda, RDS and SQS, all OK.*
+
+![Alarms](evidence/aws-alarms.png)
+*Alarms notify through SNS. They cover API 5xx, throttles, p95 latency, Lambda errors (api, marker, notifier), database CPU and connections, both dead-letter queues, and the age of the marking backlog.*
+
+#### 7.6 Load test
+
+![Load test](evidence/cli-05-load-test.png)
+*400 requests at 45 req/s through CloudFront and the API: **all 200**, p50 162 ms, p95 211 ms.*
+
+![Load test quota](evidence/cli-05b-load-test-quota-limit.png)
+*With 20 parallel workers (137 req/s), 490 of 500 requests returned **503**. A new account's Lambda concurrency quota is only 10. This is why the exam-week settings below include raising that quota to 1,000 and adding provisioned concurrency before a real exam.*
+
+### 8. CI/CD
+
+`.github/workflows/deploy.yml` runs unit tests on every push and pull request. Pull requests also get a read-only `terraform plan`, and a push to `main` runs `terraform apply`, a CloudFront invalidation and a smoke test. The pipeline signs in to AWS through GitHub OIDC roles created by `infra/bootstrap`, so no access keys are stored in GitHub.
+
+![Pipeline run](evidence/cli-12-pipeline-run.png)
+*The first push to `main` started the pipeline automatically. The `test` job passed. The `deploy` job stopped at "configure AWS credentials" because the repository variables (`AWS_DEPLOY_ROLE_ARN`, `AWS_PLAN_ROLE_ARN`, `TF_STATE_BUCKET`) had not yet been set.*
+
+### 9. Limitations and lessons
+
+- **Free plan.** Aurora could not be deployed privately on the Free plan, so the deployed build uses RDS Multi-AZ. Failover took 72 s instead of Aurora's < 60 s, and the database size is fixed.
+- **Lambda quota.** The default concurrency of 10 is far below exam-day demand (3,000 starts in 5 minutes). A quota increase and provisioned concurrency are required before production use.
+- **SES sandbox.** All demo email goes to one verified address. Production access is needed to email real students.
+- **Account access.** Console access was lost after deployment, so items 7.2–7.5 are evidenced from the deploy log and Terraform rather than the console.
+
 ## Repository layout
 
 ```

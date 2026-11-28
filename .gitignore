@@ -27,3 +27,32 @@ __pycache__/
 
 # local notes with demo passwords – never commit
 site_url.txt
+
+# Secrets and credentials – never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+credentials
+credentials.json
+*credentials*.json
+demo_credentials*
+secrets.json
+*.secret
+
+# Terraform outputs that may contain passwords or account details
+*.tfoutput
+tf-output*.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# NOTE: evidence/ is intentionally NOT ignored – README.md uses its images.

@@ -1,0 +1,17 @@
+$ grep -n 'aws_wafv2_web_acl.main' evidence/cli-03-deploy.txt; sed -n 1,111p infra/edge.tf | grep -nE '^  name|^  scope|^    name|AWSManagedRules|limit  |aggregate_key_type'
+147:aws_wafv2_web_acl.main: Refreshing state... [id=1d623c03-44f6-4e1d-a57e-27519da2cc6e]
+4:  name               = "${local.name}-campus"
+5:  scope              = "CLOUDFRONT"
+12:  name     = "${local.name}-edge"
+13:  scope    = "CLOUDFRONT"
+20:    name     = "AWSCommonRules"
+28:        name        = "AWSManagedRulesCommonRuleSet"
+39:    name     = "AWSKnownBadInputs"
+47:        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+58:    name     = "AWSIpReputation"
+66:        name        = "AWSManagedRulesAmazonIpReputationList"
+79:    name     = "RateLimitPerIp"
+86:        limit              = var.waf_ip_rate_limit
+87:        aggregate_key_type = "IP"
+
+[exit code 0]
